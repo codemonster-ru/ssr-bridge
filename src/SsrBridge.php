@@ -1,10 +1,11 @@
 <?php
 
-namespace Codemonster\SsrBridge;
+namespace Codemonster\Ssr;
 
 use RuntimeException;
+use Codemonster\SsrBridge\ProcessHelper;
 
-class Bridge
+class SsrBridge
 {
     protected string $mode;
     protected ?string $url;

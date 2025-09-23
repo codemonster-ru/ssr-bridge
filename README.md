@@ -22,14 +22,14 @@ composer require codemonster-ru/ssr-bridge
 ## Usage
 
 ```php
-use Codemonster\SsrBridge\Bridge;
+use Codemonster\Ssr\SsrBridge;
 
 // Local mode (Node.js runs directly)
-$bridge = new Bridge('local', null, __DIR__.'/../node_modules/ssr-service/dist/ssr.js');
+$bridge = new SsrBridge('local', null, __DIR__.'/../node_modules/ssr-service/dist/ssr.js');
 $html = $bridge->render('Home', ['message' => 'Hello']);
 
 // HTTP mode (connecting to the remote SSR API)
-$bridge = new Bridge('http', 'http://127.0.0.1:3000');
+$bridge = new SsrBridge('http', 'http://127.0.0.1:3000');
 $html = $bridge->render('Home', ['message' => 'Hello']);
 ```
 

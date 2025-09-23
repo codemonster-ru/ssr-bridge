@@ -14,7 +14,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Codemonster\\SsrBridge\\": "src/"
+            "Codemonster\\Ssr\\": "src/"
         }
     },
     "require": {
