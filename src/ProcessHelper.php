@@ -1,6 +1,6 @@
 <?php
 
-namespace Codemonster\SsrBridge;
+namespace Codemonster\Ssr;
 
 class ProcessHelper
 {

@@ -3,7 +3,6 @@
 namespace Codemonster\Ssr;
 
 use RuntimeException;
-use Codemonster\SsrBridge\ProcessHelper;
 
 class SsrBridge
 {
