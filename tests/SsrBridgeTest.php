@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -13,7 +14,10 @@ final class SsrBridgeTest extends TestCase
     public function unknownModeThrows(): void
     {
         try {
-            $bridge = new SsrBridge('foo');
+            $bridge = new SsrBridge([
+                'mode' => 'foo',
+                'script' => __FILE__,
+            ]);
             $bridge->render('Home');
 
             $this->fail('Expected RuntimeException was not thrown');

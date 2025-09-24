@@ -73,6 +73,10 @@ class SsrBridge
 
     protected function renderLocal(string $payload): string
     {
+        if (!in_array($this->config['mode'], ['development', 'production'], true)) {
+            throw new RuntimeException("Unknown SSR mode: {$this->config['mode']}");
+        }
+
         $script = $this->config['script'];
 
         if (!file_exists($script)) {
