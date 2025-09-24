@@ -6,18 +6,32 @@ use RuntimeException;
 
 class SsrBridge
 {
-    protected string $mode;
-    protected ?string $url;
-    protected string $ssrScript;
+    protected array $config;
 
-    public function __construct(
-        string $mode = 'local',
-        ?string $url = null,
-        ?string $ssrScript = null
-    ) {
-        $this->mode = $mode;
-        $this->url = $url;
-        $this->ssrScript = $ssrScript ?? getcwd() . '/node_modules/ssr-service/dist/ssr.js';
+    public function __construct(array $config = [])
+    {
+        $defaults = [
+            'transport' => 'local', // local | http
+            'mode' => 'production', // SSR runtime mode: development | production
+            'script' => 'node_modules/@codemonster-ru/ssr/dist/cli.js',
+            'cwd' => getcwd(),
+            'url' => 'http://localhost:3000',
+            'client_path' => '',
+            'server_entry' => '',
+            'manifest_path' => '',
+            'dev_entry_server' => '',
+            'client_entry' => '',
+            'script_attrs' => 'type="module"',
+            'port' => 3000,
+            'dev_root' => null,
+            'disable_preload' => false,
+            'disable_js_preload' => false,
+            'disable_css_preload' => false,
+            'disable_font_preload' => false,
+            'disable_image_preload' => false,
+        ];
+
+        $this->config = array_merge($defaults, $config);
     }
 
     public function render(string $component, array $props = []): string
@@ -27,46 +41,75 @@ class SsrBridge
             'props' => $props,
         ], JSON_UNESCAPED_UNICODE);
 
-        return match ($this->mode) {
-            'http' => $this->renderHttp($payload),
-            'local' => $this->renderLocal($payload),
-            default => throw new RuntimeException("Unknown SSR mode: {$this->mode}")
-        };
+        return $this->config['transport'] === 'http'
+            ? $this->renderHttp($payload)
+            : $this->renderLocal($payload);
     }
 
     protected function renderHttp(string $payload): string
     {
-        if (!$this->url) {
-            throw new RuntimeException("Bridge in 'http' mode requires a URL");
+        if (!$this->config['url']) {
+            throw new RuntimeException("SSR URL is not configured.");
         }
 
-        $ch = curl_init("{$this->url}/render");
+        $opts = [
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\n",
+                'content' => $payload,
+                'timeout' => 10,
+            ],
+        ];
 
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-        ]);
+        $context = stream_context_create($opts);
+        $result = file_get_contents($this->config['url'] . '/render', false, $context);
 
-        $response = curl_exec($ch);
-
-        if ($response === false) {
-            throw new RuntimeException("Error requesting SSR server: " . curl_error($ch));
+        if ($result === false) {
+            throw new RuntimeException('Remote SSR request failed.');
         }
 
-        curl_close($ch);
-
-        return $response;
+        return $result;
     }
 
     protected function renderLocal(string $payload): string
     {
-        if (!file_exists($this->ssrScript)) {
-            throw new RuntimeException("SSR script not found: {$this->ssrScript}");
+        $script = $this->config['script'];
+
+        if (!file_exists($script)) {
+            throw new RuntimeException("SSR script not found: {$script}");
         }
 
-        $result = ProcessHelper::run('node', [$this->ssrScript], $payload);
+        $args = [$script, 'render'];
+
+        $args[] = '--mode=' . $this->config['mode'];
+        $args[] = '--cli-mode=true';
+        $args[] = '--client-path=' . $this->config['client_path'];
+        $args[] = '--server-entry=' . $this->config['server_entry'];
+        $args[] = '--manifest-path=' . $this->config['manifest_path'];
+        $args[] = '--dev-entry-server=' . $this->config['dev_entry_server'];
+        $args[] = '--client-entry=' . $this->config['client_entry'];
+        $args[] = '--script-attrs=' . $this->config['script_attrs'];
+        $args[] = '--port=' . $this->config['port'];
+
+        if (!empty($this->config['dev_root'])) {
+            $args[] = '--dev-root=' . $this->config['dev_root'];
+        }
+
+        foreach ([
+            'disable-preload',
+            'disable-js-preload',
+            'disable-css-preload',
+            'disable-font-preload',
+            'disable-image-preload',
+        ] as $flag) {
+            if (!empty($this->config[$flag])) {
+                $args[] = '--' . $flag;
+            }
+        }
+
+        $cwd = $this->config['cwd'] ?? getcwd();
+
+        $result = ProcessHelper::run('node', $args, $payload, $cwd);
 
         if ($result['exitCode'] !== 0) {
             throw new RuntimeException("Local SSR failed: " . $result['stderr']);

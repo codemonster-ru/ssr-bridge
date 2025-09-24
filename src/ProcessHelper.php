@@ -4,7 +4,7 @@ namespace Codemonster\Ssr;
 
 class ProcessHelper
 {
-    public static function run(string $command, array $args = [], ?string $input = null): array
+    public static function run(string $command, array $args = [], ?string $input = null, ?string $cwd = null): array
     {
         $cmd = escapeshellcmd($command) . ' ' . implode(' ', array_map('escapeshellarg', $args));
 
@@ -14,7 +14,13 @@ class ProcessHelper
             2 => ['pipe', 'w'],
         ];
 
-        $process = proc_open($cmd, $descriptors, $pipes);
+        if ($cwd) {
+            $cwd = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $cwd);
+            $cwd = rtrim($cwd, DIRECTORY_SEPARATOR);
+            $cwd = preg_replace('#' . preg_quote(DIRECTORY_SEPARATOR) . '+#', DIRECTORY_SEPARATOR, $cwd);
+        }
+
+        $process = proc_open($cmd, $descriptors, $pipes, $cwd ?? getcwd());
 
         if (!is_resource($process)) {
             return ['exitCode' => 1, 'stdout' => '', 'stderr' => 'Failed to start process'];

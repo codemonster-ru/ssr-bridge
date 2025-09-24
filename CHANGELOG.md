@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2025-09-25
+
+### Added
+
+-   Automatic default value substitution in the constructor (`transport`, `mode`, `script`, `cwd`, ​​`url`, etc.).
+-   Support for the `--cli-mode` flag for CLI SSR launch (prevents freezes in dev mode).
+-   Flexible control over preload flags (`disable_preload`, `disable_js_preload`, `disable_css_preload`, `disable_font_preload`, `disable_image_preload`).
+
+### Changed
+
+-   Local rendering always uses the user project's `cwd` (by default, `getcwd()`).
+-   The CLI config and arguments have become consistent: all values ​​are passed strictly via flags.
+-   Improved error message if the SSR script is not found.
+
 ## [1.0.2] - 2025-09-24
 
 ### Changed
