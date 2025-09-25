@@ -13,7 +13,7 @@ class SsrBridge
         $defaults = [
             'transport' => 'local', // local | http
             'mode' => 'production', // SSR runtime mode: development | production
-            'script' => 'node_modules/@codemonster-ru/ssr/dist/cli.js',
+            'script' => 'node_modules/@codemonster-ru/ssr-service/dist/cli.js',
             'cwd' => getcwd(),
             'url' => 'http://localhost:3000',
             'client_path' => '',

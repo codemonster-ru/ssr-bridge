@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-09-26
+
+### Changed
+
+-   Updated SSR integration:  
+    now uses `@codemonster-ru/ssr-service` instead of `@codemonster-ru/ssr`.
+
+### Notes
+
+-   Please ensure you have installed the new NPM package:
+    ```bash
+    npm uninstall @codemonster-ru/ssr
+    npm install @codemonster-ru/ssr-service
+    ```
+
 ## [1.0.3] - 2025-09-25
 
 ### Added
